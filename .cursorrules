@@ -1,0 +1,177 @@
+# Cursor Rules Documentation
+
+## TypeScript Rules
+
+### Type Definitions
+- Create a separate `types` directory at the root level
+- Each domain should have its own type file (e.g., `user.types.ts`, `stripe.types.ts`)
+- Export all interfaces and types
+- Use type inference when types are obvious
+- Use explicit return types for functions
+
+```typescript
+// types/user.types.ts
+export interface User {
+  id: string
+  email: string
+  name: string
+  avatarUrl: string | null
+  authType: 'google' | 'local'
+  createdAt: Date
+  updatedAt: Date
+  deletedAt: Date | null
+}
+
+export type UserCreateInput = Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>
+```
+
+### Vue Component Rules
+- Use `<script setup lang="ts">` for all components
+- Define prop types using TypeScript interfaces
+- Use `defineProps` and `defineEmits` with type arguments
+- Type all ref/reactive state
+- Type computed properties return values
+
+```typescript
+// components/UserCard.vue
+<script setup lang="ts">
+import type { User } from '@/types/user.types'
+
+interface Props {
+  user: User
+  isEditable?: boolean
+}
+
+interface Emits {
+  (e: 'update', user: User): void
+  (e: 'delete', id: string): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
+const userState = ref<User>(props.user)
+</script>
+```
+
+### API Types
+- Define request/response types for all API endpoints
+- Use zod or similar for runtime validation
+- Export API types for reuse
+
+```typescript
+// types/api.types.ts
+export interface ApiResponse<T> {
+  data: T
+  error: null | string
+  status: number
+}
+
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface LoginResponse {
+  user: User
+  token: string
+}
+```
+
+### Database Types
+- Define types matching database schema
+- Include all nullable fields
+- Use strict types for enums
+
+```typescript
+// types/database.types.ts
+export interface DbUser {
+  id: string
+  email: string
+  password: string | null
+  auth_type: 'google' | 'local'
+  name: string
+  avatar_url: string | null
+  created_at: Date
+  updated_at: Date
+  deleted_at: Date | null
+}
+
+export interface DbStripeCustomer {
+  id: string
+  user_id: string
+  stripe_customer_id: string
+  plan_type: 'basic' | 'pro' | 'enterprise'
+  credits: number | null
+  created_at: Date
+  updated_at: Date
+  deleted_at: Date | null
+}
+```
+
+### Vuex/Pinia Store Rules
+- Define state types
+- Type all actions and mutations
+- Use type-safe getters
+
+```typescript
+// stores/user.store.ts
+interface UserState {
+  currentUser: User | null
+  isLoading: boolean
+  error: string | null
+}
+
+export const useUserStore = defineStore('user', {
+  state: (): UserState => ({
+    currentUser: null,
+    isLoading: false,
+    error: null
+  })
+})
+```
+
+## General Code Style
+
+### Naming Conventions
+- Use PascalCase for types, interfaces, and components
+- Use camelCase for variables, functions, and props
+- Use kebab-case for file names
+- Use UPPER_SNAKE_CASE for constants
+
+### File Organization
+- Group related files in feature directories
+- Keep components close to where they're used
+- Separate reusable utilities
+- Group types by domain
+
+### Import Order
+1. Vue and framework imports
+2. Third-party libraries
+3. Type imports
+4. Local components
+5. Utils and helpers
+6. Assets and styles
+
+### Best Practices
+- Avoid any type unless absolutely necessary
+- Use type guards for runtime type checking
+- Prefer interfaces over type aliases for objects
+- Use union types for finite sets of values
+- Type all function parameters and return values
+
+### Testing
+- Include types in test files
+- Type test fixtures and mocks
+- Use type-safe assertions
+
+```typescript
+// tests/components/user-card.test.ts
+import type { User } from '@/types/user.types'
+
+const mockUser: User = {
+  id: '1',
+  name: 'Test User',
+  email: 'test@example.com'
+}
+```
