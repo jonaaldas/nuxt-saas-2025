@@ -2,10 +2,9 @@
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
-  modules: [
-    "@nuxtjs/tailwindcss",
-    "@unlok-co/nuxt-stripe",
-    "shadcn-nuxt",
-    "@nuxtjs/color-mode",
-  ],
+  modules: ["@nuxtjs/tailwindcss", "@unlok-co/nuxt-stripe", "shadcn-nuxt", "@nuxtjs/color-mode"],
+  ssr: false,
+  routeRules: {
+    "/blog/**": { ssr: true },
+  },
 });

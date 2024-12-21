@@ -1,9 +1,13 @@
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { useIsAuthenticated, useIsPaid, useUser } from "~/composables/states";
+import { useRouter } from "vue-router";
 
 import { useColorMode } from "@vueuse/core";
 const mode = useColorMode();
 mode.value = "dark";
+
+const router = useRouter();
 
 import {
   NavigationMenu,
@@ -14,32 +18,40 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { ChevronsDown, Menu } from "lucide-vue-next";
-import GithubIcon from "@/icons/GithubIcon.vue";
+import { ChevronsDown, Menu, User, CreditCard, LogOut } from "lucide-vue-next";
 import ToggleTheme from "./ToggleTheme.vue";
+
+// Get auth states
+const isAuthenticated = useIsAuthenticated();
+const isPaid = useIsPaid();
+const user = useUser();
 
 interface RouteProps {
   href: string;
   label: string;
 }
 
-interface FeatureProps {
-  title: string;
-  description: string;
-}
-
 const routeList: RouteProps[] = [
   {
-    href: "#testimonials",
-    label: "Testimonials",
+    href: "#features",
+    label: "How It Works",
   },
   {
-    href: "#team",
-    label: "Team",
+    href: "#pricing",
+    label: "Pricing",
   },
   {
     href: "#contact",
@@ -51,22 +63,38 @@ const routeList: RouteProps[] = [
   },
 ];
 
-const featureList: FeatureProps[] = [
-  {
-    title: "Showcase Your Value ",
-    description: "Highlight how your product solves user problems.",
-  },
-  {
-    title: "Build Trust",
-    description: "Leverages social proof elements to establish trust and credibility.",
-  },
-  {
-    title: "Capture Leads",
-    description: "Make your lead capture form visually appealing and strategically.",
-  },
-];
-
 const isOpen = ref<boolean>(false);
+
+// Get user initials for avatar fallback
+const userInitials = computed(() => {
+  if (!user.value) return "";
+  return `${user.value.firstName[0]}${user.value.lastName[0]}`.toUpperCase();
+});
+
+// Handle logout
+const handleLogout = () => {
+  // Add logout logic here
+  console.log("Logging out...");
+};
+
+// Handle billing portal redirect
+const handleBillingPortal = () => {
+  window.open("https://billing.stripe.com/p/login/test_eVa00b6zKa4k7pm4gg", "_blank");
+};
+
+// Handle profile navigation
+const handleProfileClick = () => {
+  navigateTo("/dashboard?tab=profile");
+};
+
+// Handle auth navigation
+const handleLogin = () => {
+  navigateTo("/login");
+};
+
+const handleSignup = () => {
+  navigateTo("/register");
+};
 </script>
 
 <template>
@@ -81,6 +109,7 @@ const isOpen = ref<boolean>(false);
         class="bg-gradient-to-tr from-primary via-primary/70 to-primary rounded-lg w-9 h-9 mr-2 border text-white" />
       ShadcnVue</a
     >
+
     <!-- Mobile -->
     <div class="flex items-center md:!hidden">
       <Sheet v-model:open="isOpen">
@@ -100,6 +129,7 @@ const isOpen = ref<boolean>(false);
               </SheetTitle>
             </SheetHeader>
 
+            <!-- Navigation Links -->
             <div class="flex flex-col gap-2">
               <Button
                 v-for="{ href, label } in routeList"
@@ -112,11 +142,38 @@ const isOpen = ref<boolean>(false);
                 </a>
               </Button>
             </div>
+
+            <!-- User Section for Mobile -->
+            <div v-if="isAuthenticated" class="mt-4 border-t pt-4">
+              <p class="px-2 text-sm font-medium text-muted-foreground mb-2">My Account</p>
+              <div class="flex flex-col gap-2">
+                <Button variant="ghost" class="justify-start" @click="handleProfileClick">
+                  <User class="mr-2 h-4 w-4" />
+                  Profile
+                </Button>
+                <Button v-if="isPaid" variant="ghost" class="justify-start" @click="handleBillingPortal">
+                  <CreditCard class="mr-2 h-4 w-4" />
+                  Billing
+                </Button>
+                <Button variant="ghost" class="justify-start" @click="handleLogout">
+                  <LogOut class="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
+            </div>
+
+            <!-- Auth Buttons for Mobile -->
+            <div v-else class="mt-4 border-t pt-4 flex flex-col gap-2">
+              <Button variant="ghost" class="justify-start" @click="handleLogin">Login</Button>
+              <Button variant="default" @click="handleSignup">Sign up</Button>
+            </div>
           </div>
 
           <SheetFooter class="flex-col sm:flex-col justify-start items-start">
             <Separator class="mb-2" />
-            <ToggleTheme />
+            <div class="flex items-center justify-between w-full">
+              <ToggleTheme />
+            </div>
           </SheetFooter>
         </SheetContent>
       </Sheet>
@@ -125,28 +182,6 @@ const isOpen = ref<boolean>(false);
     <!-- Desktop -->
     <NavigationMenu class="hidden md:block">
       <NavigationMenuList>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger class="bg-card text-base"> Features </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <div class="grid w-[600px] grid-cols-2 gap-5 p-4">
-              <img src="https://www.radix-vue.com/logo.svg" alt="Beach" class="h-full w-full rounded-md object-cover" />
-              <ul class="flex flex-col gap-2">
-                <li
-                  v-for="{ title, description } in featureList"
-                  :key="title"
-                  class="rounded-md p-3 text-sm hover:bg-muted">
-                  <p class="mb-1 font-semibold leading-none text-foreground">
-                    {{ title }}
-                  </p>
-                  <p class="line-clamp-2 text-muted-foreground">
-                    {{ description }}
-                  </p>
-                </li>
-              </ul>
-            </div>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Button
@@ -164,17 +199,40 @@ const isOpen = ref<boolean>(false);
       </NavigationMenuList>
     </NavigationMenu>
 
-    <div class="hidden lg:flex">
+    <div class="hidden md:flex items-center gap-2">
       <ToggleTheme />
 
-      <Button as-child size="sm" variant="ghost" aria-label="View on GitHub">
-        <a
-          aria-label="View on GitHub"
-          href="https://github.com/leoMirandaa/shadcn-vue-landing-page.git"
-          target="_blank">
-          <GithubIcon class="size-5" />
-        </a>
-      </Button>
+      <!-- User Dropdown -->
+      <DropdownMenu v-if="isAuthenticated">
+        <DropdownMenuTrigger>
+          <Avatar>
+            <AvatarImage :src="`https://avatar.vercel.sh/${user?.email}.png`" alt="User avatar" />
+            <AvatarFallback>{{ userInitials }}</AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuItem @click="handleProfileClick">
+            <User class="mr-2 h-4 w-4" />
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem v-if="isPaid" @click="handleBillingPortal">
+            <CreditCard class="mr-2 h-4 w-4" />
+            Billing
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem @click="handleLogout">
+            <LogOut class="mr-2 h-4 w-4" />
+            Logout
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <!-- Login/Register Buttons -->
+      <template v-else>
+        <Button variant="ghost" @click="handleLogin">Login</Button>
+        <Button variant="default" @click="handleSignup">Sign up</Button>
+      </template>
     </div>
   </header>
 </template>

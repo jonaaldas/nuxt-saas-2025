@@ -7,7 +7,7 @@
       </CardHeader>
       <CardContent>
         <!-- Avatar Section -->
-        <div class="flex items-start space-x-6 mb-8">
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8">
           <div class="relative">
             <div class="h-24 w-24 rounded-full overflow-hidden bg-muted">
               <img
@@ -28,10 +28,10 @@
               </label>
             </div>
           </div>
-          <div class="space-y-1">
+          <div class="space-y-1 text-center sm:text-left">
             <h3 class="text-lg font-medium">Profile Picture</h3>
             <p class="text-sm text-muted-foreground">Upload a new avatar or remove the current one</p>
-            <div class="flex space-x-2">
+            <div class="flex justify-center sm:justify-start space-x-2 mt-2">
               <Button variant="outline" size="sm" :disabled="isUpdating" @click="handleAvatarUpload">
                 {{ isUpdating ? "Updating..." : "Update" }}
               </Button>
@@ -76,9 +76,11 @@
               Email cannot be changed. Contact support if you need to update it.
             </p>
           </div>
-          <Button type="submit" :disabled="isUpdatingInfo || !isPersonalInfoValid">
-            {{ isUpdatingInfo ? "Saving Changes..." : "Save Changes" }}
-          </Button>
+          <div class="flex justify-center sm:justify-start">
+            <Button type="submit" :disabled="isUpdatingInfo || !isPersonalInfoValid">
+              {{ isUpdatingInfo ? "Saving Changes..." : "Save Changes" }}
+            </Button>
+          </div>
         </form>
 
         <!-- Password Change Form -->
@@ -118,9 +120,11 @@
               <p v-if="confirmNewPasswordError" class="text-sm text-red-500">{{ confirmNewPasswordError }}</p>
             </div>
           </div>
-          <Button type="submit" variant="outline" :disabled="isChangingPassword || !isPasswordFormValid">
-            {{ isChangingPassword ? "Changing Password..." : "Change Password" }}
-          </Button>
+          <div class="flex justify-center sm:justify-start">
+            <Button type="submit" variant="outline" :disabled="isChangingPassword || !isPasswordFormValid">
+              {{ isChangingPassword ? "Changing Password..." : "Change Password" }}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
