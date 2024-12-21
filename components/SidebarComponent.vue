@@ -89,11 +89,11 @@ onMounted(() => {
               (event) => {
                 event.preventDefault();
                 tab = item.tab;
-                item.fn ? item.fn() : null;
+                // item.fn ? item.fn() : null;
               }
             ">
             <p
-              class="text-sm p-2 rounded-md transition-colors duration-200 hover:bg-gray-50"
+              class="text-lg p-2 rounded-md transition-colors duration-200 hover:bg-gray-50"
               :class="{
                 'bg-blue-50 text-blue-700 font-medium': tab === item.tab,
                 'text-gray-600 hover:text-gray-900': tab !== item.tab,
@@ -108,7 +108,7 @@ onMounted(() => {
         <SidebarGroupLabel>Coming Soon</SidebarGroupLabel>
         <SidebarMenu>
           <SidebarMenuItem v-for="item in data.navComingSoon" :key="item.title" class="opacity-50 cursor-not-allowed">
-            <p class="text-sm p-2 rounded-md text-gray-400">
+            <p class="text-lg p-2 rounded-md text-gray-400">
               {{ item.title }}
             </p>
           </SidebarMenuItem>

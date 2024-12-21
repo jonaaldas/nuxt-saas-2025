@@ -4,18 +4,13 @@ import Upload from "~/components/dashboard/Upload.vue";
 import Settings from "~/components/dashboard/Settings.vue";
 
 const userDropdownOpen = ref(false);
-
-// Create a map of tab names to components
 const tabComponents = {
   upload: markRaw(Upload),
   settings: markRaw(Settings),
-  // Add more components as needed
 } as const;
 
-// Create a type for valid tab names
 type TabName = keyof typeof tabComponents;
 
-// Function to get component based on tab name
 const getTabComponent = (tab: string) => {
   return tabComponents[tab as TabName] || null;
 };
