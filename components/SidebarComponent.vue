@@ -46,24 +46,6 @@ const data = ref({
       title: "Pricing",
       tab: "pricing",
     },
-    {
-      title: "Connected Accounts",
-      tab: "connected",
-    },
-    {
-      title: "Log out",
-      tab: "logout",
-    },
-  ],
-  navComingSoon: [
-    {
-      title: "See Videos",
-      tab: "uploaded",
-    },
-    {
-      title: "Analytics",
-      tab: "analytics",
-    },
   ],
 });
 
@@ -107,19 +89,10 @@ onMounted(() => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
-
-      <SidebarGroup>
-        <SidebarGroupLabel>Coming Soon</SidebarGroupLabel>
-        <SidebarMenu>
-          <SidebarMenuItem v-for="item in data.navComingSoon" :key="item.title" class="opacity-50 cursor-not-allowed">
-            <p class="text-lg p-2 rounded-md text-gray-400">
-              {{ item.title }}
-            </p>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroup>
-
       <SidebarRail />
+      <SidebarFooter>
+        <Button> Log out </Button>
+      </SidebarFooter>
     </Sidebar>
     <SidebarInset>
       <header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
