@@ -71,7 +71,6 @@ onMounted(() => {
   if (tabUrl) {
     tab.value = tabUrl as "upload" | "uploaded" | "connected" | "settings" | "analytics" | "billing";
   }
- 
 });
 </script>
 
@@ -118,7 +117,6 @@ onMounted(() => {
 
       <SidebarRail />
     </Sidebar>
-
     <SidebarInset>
       <header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger class="-ml-1" />
