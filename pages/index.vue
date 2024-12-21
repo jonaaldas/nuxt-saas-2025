@@ -2,20 +2,12 @@
 import { onMounted } from "vue";
 import Navbar from "../components/landing/Navbar.vue";
 import Hero from "../components/landing/Hero.vue";
-import Benefits from "../components/landing/Benefits.vue";
-import Features from "../components/landing/Features.vue";
-import Services from "../components/landing/Services.vue";
 import HowItWorks from "../components/landing/HowItWorks.vue";
-import Sponsors from "../components/landing/Sponsors.vue";
-import Testimonials from "../components/landing/Testimonials.vue";
-import Team from "../components/landing/Team.vue";
 import Pricing from "../components/Pricing.vue";
-import Community from "../components/landing/Community.vue";
 import Contact from "../components/landing/Contact.vue";
 import FAQ from "../components/landing/FAQ.vue";
 import Footer from "../components/landing/Footer.vue";
 
-// SEO and dark mode meta
 useHead({
   htmlAttrs: {
     class: "dark",
@@ -26,18 +18,17 @@ useHead({
   ],
 });
 
-// Initialize dark mode
 onMounted(() => {
-  // Check system preference
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-  // Check localStorage
   const storedTheme = localStorage.getItem("theme");
 
-  // Apply dark mode if either system prefers it or it was previously set
   if (storedTheme === "dark" || (!storedTheme && prefersDark)) {
     document.documentElement.classList.add("dark");
     localStorage.setItem("theme", "dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("theme", "light");
   }
 });
 </script>
@@ -46,14 +37,7 @@ onMounted(() => {
   <div class="bg-background text-foreground">
     <Navbar />
     <Hero />
-    <Sponsors />
-    <Benefits />
-    <Features />
-    <Services />
     <HowItWorks />
-    <Testimonials />
-    <Team />
-    <Community />
     <Pricing />
     <Contact />
     <FAQ />

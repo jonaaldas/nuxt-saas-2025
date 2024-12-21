@@ -31,9 +31,14 @@ const getDefaultTab = computed(() => {
 onMounted(() => {
   const route = useRoute();
   if (!route.query.tab) {
-    getTabComponent(getDefaultTab.value);
-  } else {
-    getTabComponent(route.query.tab as string);
+    // If no tab query param, redirect to default tab
+    navigateTo(
+      {
+        path: route.path,
+        query: { ...route.query, tab: getDefaultTab.value },
+      },
+      { replace: true }
+    );
   }
 });
 </script>
@@ -43,8 +48,10 @@ onMounted(() => {
     <SidebarComponent>
       <template #content="{ tab }">
         <main class="p-6">
+          <!-- Show tab component if it exists -->
           <component :is="getTabComponent(tab)" v-if="getTabComponent(tab)" />
-          <!-- <slot v-else /> -->
+          <!-- Fallback to NuxtPage for other routes -->
+          <NuxtPage v-else />
         </main>
       </template>
     </SidebarComponent>

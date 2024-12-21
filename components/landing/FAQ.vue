@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface FAQProps {
   question: string;
@@ -25,10 +20,8 @@ const FAQList: FAQProps[] = [
     value: "item-2",
   },
   {
-    question:
-      "Lorem ipsum dolor sit amet Consectetur natus dolor minus quibusdam?",
-    answer:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Labore qui nostrum reiciendis veritatis.",
+    question: "Lorem ipsum dolor sit amet Consectetur natus dolor minus quibusdam?",
+    answer: "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Labore qui nostrum reiciendis veritatis.",
     value: "item-3",
   },
   {
@@ -37,8 +30,7 @@ const FAQList: FAQProps[] = [
     value: "item-4",
   },
   {
-    question:
-      "Enim ad minim veniam, quis nostrud exercitation ullamco laboris?",
+    question: "Enim ad minim veniam, quis nostrud exercitation ullamco laboris?",
     answer: "consectetur adipisicing elit. Sint labore.",
     value: "item-5",
   },
@@ -46,28 +38,15 @@ const FAQList: FAQProps[] = [
 </script>
 
 <template>
-  <section
-    id="faq"
-    class="container md:w-[700px] py-24 sm:py-32"
-  >
+  <section id="faq" class="container md:w-[700px] py-24 sm:py-32">
     <div class="text-center mb-8">
       <h2 class="text-lg text-primary text-center mb-2 tracking-wider">FAQS</h2>
 
-      <h2 class="text-3xl md:text-4xl text-center font-bold">
-        Common Questions
-      </h2>
+      <h2 class="text-3xl md:text-4xl text-center font-bold">Common Questions</h2>
     </div>
 
-    <Accordion
-      type="single"
-      collapsible
-      class="AccordionRoot"
-    >
-      <AccordionItem
-        v-for="{ question, answer, value } in FAQList"
-        :key="value"
-        :value="value"
-      >
+    <Accordion type="single" collapsible class="AccordionRoot">
+      <AccordionItem v-for="{ question, answer, value } in FAQList" :key="value" :value="value">
         <AccordionTrigger class="text-left"> {{ question }} </AccordionTrigger>
 
         <AccordionContent>{{ answer }}</AccordionContent>
@@ -76,15 +55,8 @@ const FAQList: FAQProps[] = [
 
     <h3 class="font-medium mt-4">
       Still have questions?
-      <a
-        href="#"
-        class="text-muted-foreground"
-      >
-        <a
-          href="#"
-          class="underline"
-          >Contact us</a
-        >
+      <a href="#" class="text-muted-foreground">
+        <span class="underline">Contact us</span>
       </a>
     </h3>
   </section>
