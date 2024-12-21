@@ -1,33 +1,44 @@
 <script setup lang="ts">
-import { useColorMode } from "@vueuse/core";
-const mode = useColorMode();
 import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-vue-next";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Moon, Sun, Monitor } from "lucide-vue-next";
+
+const colorMode = useColorMode();
+
+const modes = [
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+  { value: "system", label: "System", icon: Monitor },
+];
+
+const currentIcon = computed(() => {
+  if (colorMode.value === "dark") return Moon;
+  return Sun;
+});
 </script>
 
 <template>
-  <Button
-    @click="mode = mode === 'dark' ? 'light' : 'dark'"
-    size="sm"
-    variant="ghost"
-    class="w-full justify-start"
-  >
-    <div
-      v-if="mode == 'light'"
-      class="flex gap-2"
-    >
-      <Moon class="size-5" />
-      <span class="block lg:hidden"> Dark </span>
-    </div>
-
-    <div
-      v-else="mode == 'dark'"
-      class="flex gap-2"
-    >
-      <Sun class="size-5" />
-      <span class="block lg:hidden">Light</span>
-    </div>
-
-    <span class="sr-only">Toggle theme</span>
-  </Button>
+  <DropdownMenu>
+    <DropdownMenuTrigger as-child>
+      <Button variant="outline" size="icon">
+        <component :is="currentIcon" class="h-[1.2rem] w-[1.2rem] transition-all" />
+        <span class="sr-only">Toggle theme</span>
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end">
+      <DropdownMenuItem
+        v-for="mode in modes"
+        :key="mode.value"
+        @click="colorMode.preference = mode.value"
+        :class="{ 'bg-accent': colorMode.preference === mode.value }">
+        <component :is="mode.icon" class="mr-2 h-4 w-4" />
+        {{ mode.label }}
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
 </template>

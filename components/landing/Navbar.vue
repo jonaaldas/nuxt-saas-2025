@@ -3,8 +3,7 @@ import { ref, computed } from "vue";
 import { useIsAuthenticated, useIsPaid, useUser } from "~/composables/states";
 import { useRouter } from "vue-router";
 
-import { useColorMode } from "@vueuse/core";
-const mode = useColorMode();
+const colorMode = useColorMode();
 
 import {
   NavigationMenu,
@@ -105,8 +104,8 @@ const handleSignup = () => {
 <template>
   <header
     :class="{
-      'shadow-light': mode === 'light',
-      'shadow-dark': mode === 'dark',
+      'shadow-light': colorMode.value === 'light',
+      'shadow-dark': colorMode.value === 'dark',
       'w-[90%] md:w-[70%] lg:w-[75%] lg:max-w-screen-xl top-5 mx-auto sticky border z-40 rounded-2xl flex justify-between items-center p-2 bg-card shadow-md': true,
     }">
     <a href="/" class="font-bold text-lg flex items-center">
@@ -174,12 +173,12 @@ const handleSignup = () => {
             </div>
           </div>
 
-          <SheetFooter class="flex-col sm:flex-col justify-start items-start">
+          <!-- <SheetFooter class="flex-col sm:flex-col justify-start items-start">
             <Separator class="mb-2" />
             <div class="flex items-center justify-between w-full">
               <ToggleTheme />
             </div>
-          </SheetFooter>
+          </SheetFooter> -->
         </SheetContent>
       </Sheet>
     </div>
