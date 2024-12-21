@@ -1,19 +1,64 @@
-import { navigateTo } from "nuxt/app";
-import auth from "~/server/utils/auth";
+import { getUserByEmail } from "~/server/db/queries/getUserByEmail";
+import bcrypt from "bcrypt";
+import { z } from "zod";
+
+// Validation schema
+const loginSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(1, "Password is required"),
+});
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
+  try {
+    // Validate request body
+    const body = await readBody(event);
+    const validatedData = loginSchema.parse(body);
+    const { email, password } = validatedData;
 
-  const res = await auth.attempt(event, body.email.toLowerCase(), body.password);
+    // Get user by email
+    const user = await getUserByEmail(email.toLowerCase());
+    if (!user) {
+      throw createError({
+        statusCode: 401,
+        message: "Invalid email or password",
+      });
+    }
 
-  if (!res) {
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password || "");
+    if (!isValidPassword) {
+      throw createError({
+        statusCode: 401,
+        message: "Invalid email or password",
+      });
+    }
+
+    let avatarUrl = user.avatarUrl || "";
+    // Create session
+    await auth.login(event, {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatarUrl,
+      authType: user.authType,
+    });
+
     return {
-      success: false,
-      flash: "Invalid email or password",
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
     };
-  }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw createError({
+        statusCode: 400,
+        message: error.errors[0].message,
+      });
+    }
 
-  return {
-    success: true,
-  };
+    throw error;
+  }
 });

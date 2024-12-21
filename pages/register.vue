@@ -114,16 +114,13 @@ const isSubmitting = ref(false);
 const route = useRoute();
 const router = useRouter();
 
-// Get query parameters from pricing page
 const selectedPlan = ref(route.query.plan as string);
 const returnUrl = ref(route.query.returnUrl as string);
 
-// Check if user came from pricing page
 const isFromPricing = computed(() => {
   return Boolean(selectedPlan.value && returnUrl.value);
 });
 
-// Name validation
 const validateFirstName = () => {
   const value = firstName.value.trim();
   if (!value) {
@@ -152,7 +149,6 @@ const validateLastName = () => {
   }
 };
 
-// Email validation
 const validateEmail = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const sanitizedEmail = email.value.trim().toLowerCase();
@@ -167,7 +163,6 @@ const validateEmail = () => {
   }
 };
 
-// Password validation
 const validatePassword = () => {
   const password_value = password.value;
 
@@ -202,10 +197,9 @@ const validatePassword = () => {
   }
 
   passwordError.value = "";
-  validateConfirmPassword(); // Revalidate confirm password when password changes
+  validateConfirmPassword();
 };
 
-// Confirm password validation
 const validateConfirmPassword = () => {
   if (!confirmPassword.value) {
     confirmPasswordError.value = "Please confirm your password";
@@ -234,7 +228,6 @@ const isFormValid = computed(() => {
 const handleRegister = async () => {
   formError.value = "";
 
-  // Validate all fields before submission
   validateFirstName();
   validateLastName();
   validateEmail();
@@ -258,15 +251,12 @@ const handleRegister = async () => {
       },
     });
 
-    // Handle successful registration
     if (response) {
       toaster("Registration successful!", "default");
 
-      // If user came from pricing, redirect to the stripe checkout
       if (isFromPricing.value && returnUrl.value) {
         window.location.href = returnUrl.value;
       } else {
-        // If direct registration, go to dashboard
         await navigateTo("/dashboard");
       }
     }

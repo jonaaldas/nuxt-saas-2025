@@ -56,7 +56,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "#components";
 import { Input } from "#components";
 import { Label } from "#components";
+import { useToast } from "@/components/ui/toast/use-toast";
 
+const { toast } = useToast();
 const email = ref("");
 const password = ref("");
 const emailError = ref("");
@@ -81,38 +83,10 @@ const validateEmail = () => {
 
 // Password validation
 const validatePassword = () => {
-  const password_value = password.value;
-
-  if (!password_value) {
+  if (!password.value) {
     passwordError.value = "Password is required";
     return;
   }
-
-  if (password_value.length < 8) {
-    passwordError.value = "Password must be at least 8 characters long";
-    return;
-  }
-
-  if (!/[A-Z]/.test(password_value)) {
-    passwordError.value = "Password must contain at least one uppercase letter";
-    return;
-  }
-
-  if (!/[a-z]/.test(password_value)) {
-    passwordError.value = "Password must contain at least one lowercase letter";
-    return;
-  }
-
-  if (!/[0-9]/.test(password_value)) {
-    passwordError.value = "Password must contain at least one number";
-    return;
-  }
-
-  if (!/[!@#$%^&*]/.test(password_value)) {
-    passwordError.value = "Password must contain at least one special character (!@#$%^&*)";
-    return;
-  }
-
   passwordError.value = "";
 };
 
@@ -134,22 +108,32 @@ const handleLogin = async () => {
   try {
     isSubmitting.value = true;
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    console.log("Login attempt with:", {
-      email: email.value,
-      password: password.value,
+    const response = await $fetch("/api/auth/login", {
+      method: "POST",
+      body: {
+        email: email.value,
+        password: password.value,
+      },
     });
 
-    // Simulate an authentication error for testing
-    // This should be replaced with actual authentication logic
-    if (email.value === "test@test.com") {
-      formError.value = "Invalid email or password";
-      return;
+    if (response.success) {
+      toast({
+        title: "Login successful!",
+        description: "Welcome back!",
+      });
+
+      // Redirect to dashboard
+      await navigateTo("/dashboard");
     }
-  } catch (error) {
-    formError.value = "An error occurred during login. Please try again.";
+  } catch (error: any) {
+    console.error("Login error:", error);
+    formError.value = error?.data?.message || "Invalid email or password";
+
+    toast({
+      variant: "destructive",
+      title: "Login failed",
+      description: formError.value,
+    });
   } finally {
     isSubmitting.value = false;
   }
