@@ -2,7 +2,7 @@
 export const useAuthStore = () => {
   return useState("auth", () => ({
     isAuth: true,
-    isPaid: false,
+    isPaid: true,
     user: {
       id: "1",
       email: "user@example.com",

@@ -5,9 +5,6 @@ import { useRouter } from "vue-router";
 
 import { useColorMode } from "@vueuse/core";
 const mode = useColorMode();
-mode.value = "dark";
-
-const router = useRouter();
 
 import {
   NavigationMenu,
@@ -84,16 +81,24 @@ const handleBillingPortal = () => {
 
 // Handle profile navigation
 const handleProfileClick = () => {
-  navigateTo("/dashboard?tab=profile");
+  navigateTo(
+    {
+      path: "/dashboard",
+    },
+    { replace: true }
+  );
+  isOpen.value = false;
 };
 
 // Handle auth navigation
 const handleLogin = () => {
-  navigateTo("/login");
+  navigateTo("/login", { replace: true });
+  isOpen.value = false;
 };
 
 const handleSignup = () => {
-  navigateTo("/register");
+  navigateTo("/register", { replace: true });
+  isOpen.value = false;
 };
 </script>
 

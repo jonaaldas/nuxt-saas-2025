@@ -70,7 +70,6 @@ const navigationItems = computed(() => {
       tab: "pricing",
     });
   }
-
   return baseItems;
 });
 

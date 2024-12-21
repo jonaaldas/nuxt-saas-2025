@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, markRaw, shallowRef, computed, onMounted } from "vue";
+import { ref, markRaw, shallowRef, computed, watch } from "vue";
 import { useIsAuthenticated, useIsPaid } from "~/composables/states";
 import Profile from "~/components/dashboard/Profile.vue";
 import Pricing from "~/components/Pricing.vue";
 import Billing from "~/components/dashboard/Billing.vue";
 
+const route = useRoute();
 const isAuthenticated = useIsAuthenticated();
 const isPaid = useIsPaid();
 
@@ -29,16 +30,10 @@ const getDefaultTab = computed(() => {
 });
 
 onMounted(() => {
-  const route = useRoute();
-  if (!route.query.tab) {
-    // If no tab query param, redirect to default tab
-    navigateTo(
-      {
-        path: route.path,
-        query: { ...route.query, tab: getDefaultTab.value },
-      },
-      { replace: true }
-    );
+  if (!isPaid.value) {
+    getTabComponent(getDefaultTab.value);
+  } else {
+    getTabComponent(getDefaultTab.value);
   }
 });
 </script>

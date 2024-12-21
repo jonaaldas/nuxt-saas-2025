@@ -7,4 +7,14 @@ export default defineNuxtConfig({
   routeRules: {
     "/blog/**": { ssr: true },
   },
+  colorMode: {
+    preference: "system",
+    fallback: "light",
+    hid: "nuxt-color-mode-script",
+    globalName: "__NUXT_COLOR_MODE__",
+    componentName: "ColorScheme",
+    classPrefix: "",
+    storage: "localStorage",
+    storageKey: "nuxt-color-mode",
+  },
 });
