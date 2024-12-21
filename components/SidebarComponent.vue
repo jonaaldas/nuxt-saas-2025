@@ -35,8 +35,12 @@ const data = ref({
       tab: "upload",
     },
     {
-      title: "Settings",
-      tab: "settings",
+      title: "Profile",
+      tab: "profile",
+    },
+    {
+      title: "Billing",
+      tab: "billing",
     },
     {
       title: "Pricing",

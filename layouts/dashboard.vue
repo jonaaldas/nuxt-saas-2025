@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, markRaw, shallowRef } from "vue";
 import Upload from "~/components/dashboard/Upload.vue";
-import Settings from "~/components/dashboard/Settings.vue";
-
+import Profile from "~/components/dashboard/Profile.vue";
+import Pricing from "~/components/Pricing.vue";
+import Billing from "~/components/dashboard/Billing.vue";
 const userDropdownOpen = ref(false);
 const tabComponents = {
   upload: markRaw(Upload),
-  settings: markRaw(Settings),
+  profile: markRaw(Profile),
+  pricing: markRaw(Pricing),
+  billing: markRaw(Billing),
 } as const;
 
 type TabName = keyof typeof tabComponents;
