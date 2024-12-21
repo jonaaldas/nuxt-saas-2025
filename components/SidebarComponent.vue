@@ -1,6 +1,7 @@
 <style scoped></style>
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
+import { useIsAuthenticated, useIsPaid } from "~/composables/states";
 
 import {
   Breadcrumb,
@@ -25,57 +26,85 @@ import {
 } from "./ui/sidebar";
 
 const router = useRouter();
-let tab = ref("upload");
+let tab = ref("");
+const isAuthenticated = useIsAuthenticated();
+const isPaid = useIsPaid();
 
-const data = ref({
-  title: "Dashboard",
-  navNow: [
-    {
-      title: "Upload",
-      tab: "upload",
-    },
+// Get default tab based on auth state
+const defaultTab = computed(() => {
+  if (isAuthenticated.value && isPaid.value) {
+    return "profile";
+  }
+  return "pricing";
+});
+
+// Handle dashboard breadcrumb click
+const handleDashboardClick = () => {
+  router.push({
+    path: "/dashboard",
+    query: { tab: defaultTab.value },
+  });
+};
+
+// Compute navigation items based on auth state
+const navigationItems = computed(() => {
+  const baseItems = [
     {
       title: "Profile",
       tab: "profile",
     },
-    {
+  ];
+
+  // Only show billing if user is authenticated and paid
+  if (isAuthenticated.value && isPaid.value) {
+    baseItems.push({
       title: "Billing",
       tab: "billing",
-    },
-    {
+    });
+  }
+
+  // Only show pricing if user is authenticated but not paid
+  if (isAuthenticated.value && !isPaid.value) {
+    baseItems.push({
       title: "Pricing",
       tab: "pricing",
-    },
-  ],
+    });
+  }
+
+  return baseItems;
 });
 
-const customerLink = "https://billing.stripe.com/p/login/test_eVa00b6zKa4k7pm4gg";
+const data = ref({
+  title: "Dashboard",
+  navNow: navigationItems,
+});
 
 onMounted(() => {
   const url = new URL(window.location.href);
   const tabUrl = url.searchParams.get("tab");
   if (tabUrl) {
-    tab.value = tabUrl as "upload" | "uploaded" | "connected" | "settings" | "analytics" | "billing";
+    tab.value = tabUrl as "profile" | "billing" | "pricing";
+  } else {
+    tab.value = defaultTab.value;
   }
 });
 </script>
 
 <template>
   <SidebarProvider>
-    <Sidebar>
-      <SidebarHeader> {{ data.title }} </SidebarHeader>
+    <Sidebar class="p-4">
+      <SidebarHeader class="text-base sm:text-lg"> {{ data.title }} </SidebarHeader>
 
       <SidebarGroup>
         <SidebarGroupLabel>Features</SidebarGroupLabel>
         <SidebarMenu>
           <SidebarMenuItem
-            v-for="item in data.navNow"
+            v-for="item in navigationItems"
             :key="item.title"
             @click="
               (event) => {
                 event.preventDefault();
                 tab = item.tab;
-                // item.fn ? item.fn() : null;
               }
             ">
             <p
@@ -105,7 +134,7 @@ onMounted(() => {
             </BreadcrumbItem>
             <BreadcrumbSeparator class="hidden md:block" />
             <BreadcrumbItem class="hidden md:block">
-              <BreadcrumbLink href="/dashboard"> Dashboard </BreadcrumbLink>
+              <BreadcrumbLink @click.prevent="handleDashboardClick"> Dashboard </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator class="hidden md:block" />
             <BreadcrumbItem>
