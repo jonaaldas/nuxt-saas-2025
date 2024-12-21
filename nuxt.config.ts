@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     "shadcn-nuxt",
     "@nuxtjs/color-mode",
     "nuxt-auth-utils",
+    "nuxt-resend",
   ],
   colorMode: {
     classSuffix: "",
