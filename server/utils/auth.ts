@@ -8,11 +8,23 @@ import crypto from "crypto";
 import type { User } from "../../types/user.types";
 import type { JwtPayload } from "jsonwebtoken";
 
-async function login(event: H3Event<Request>, user: User) {
+interface UserLogin {
+  id: number;
+  name: string;
+  email: string;
+  avatarUrl: string;
+  authType: string;
+  password?: string;
+}
+
+async function login(event: H3Event<Request>, user: UserLogin) {
   await replaceUserSession(event, {
     user: {
       id: user.id,
       name: user.name,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+      authType: user.authType,
     },
     loggedInAt: new Date(),
   });
