@@ -56,9 +56,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "#components";
 import { Input } from "#components";
 import { Label } from "#components";
-import { useToast } from "@/components/ui/toast/use-toast";
 
-const { toast } = useToast();
 const email = ref("");
 const password = ref("");
 const emailError = ref("");
@@ -117,10 +115,7 @@ const handleLogin = async () => {
     });
 
     if (response.success) {
-      toast({
-        title: "Login successful!",
-        description: "Welcome back!",
-      });
+      toaster("Login successful!", "default");
 
       // Redirect to dashboard
       await navigateTo("/dashboard");
@@ -129,11 +124,7 @@ const handleLogin = async () => {
     console.error("Login error:", error);
     formError.value = error?.data?.message || "Invalid email or password";
 
-    toast({
-      variant: "destructive",
-      title: "Login failed",
-      description: formError.value,
-    });
+    toaster("Login failed", "destructive");
   } finally {
     isSubmitting.value = false;
   }

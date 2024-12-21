@@ -110,16 +110,26 @@ const handleResetRequest = async () => {
   try {
     isSubmitting.value = true;
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response = await $fetch<{ success: boolean }>("/api/auth/forgot", {
+      method: "POST",
+      body: {
+        email: email.value,
+      },
+    });
 
-    console.log("Password reset requested for:", email.value);
-
-    // For security reasons, we always show success message
-    // even if the email doesn't exist in the system
-    emailSent.value = true;
-  } catch (error) {
-    formError.value = "An error occurred. Please try again.";
+    if (response.success) {
+      emailSent.value = true;
+      toaster("Check your email", "default");
+    } else {
+      // Even if the response indicates failure, we show the same message
+      // This prevents email enumeration
+      emailSent.value = true;
+      toaster("Check your email", "default");
+    }
+  } catch (error: any) {
+    console.error("Password reset request error:", error);
+    // For security, we don't show specific error messages
+    toaster("Request failed", "destructive");
   } finally {
     isSubmitting.value = false;
   }
