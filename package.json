@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@unlok-co/nuxt-stripe": "^4.0.1",
+    "nuxt-auth-utils": "^0.5.7",
     "typescript": "^5.7.2"
   }
 }
