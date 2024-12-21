@@ -248,32 +248,33 @@ const handleRegister = async () => {
   try {
     isSubmitting.value = true;
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    console.log("Registration attempt with:", {
-      firstName: firstName.value,
-      lastName: lastName.value,
-      email: email.value,
-      password: password.value,
-      selectedPlan: selectedPlan.value,
+    const response = await $fetch("/api/auth/register", {
+      method: "POST",
+      body: {
+        first_name: firstName.value,
+        last_name: lastName.value,
+        email: email.value,
+        password: password.value,
+      },
     });
 
-    if (email.value === "test@test.com") {
-      formError.value = "This email is already registered";
-      return;
-    }
+    // Handle successful registration
+    if (response) {
+      toaster("Registration successful!", "default");
 
-    // Handle post-registration navigation based on query parameters
-    if (isFromPricing.value) {
       // If user came from pricing, redirect to the stripe checkout
-      window.location.href = returnUrl.value;
-    } else {
-      // If direct registration, go to dashboard
-      router.push("/dashboard");
+      if (isFromPricing.value && returnUrl.value) {
+        window.location.href = returnUrl.value;
+      } else {
+        // If direct registration, go to dashboard
+        await navigateTo("/dashboard");
+      }
     }
-  } catch (error) {
-    formError.value = "An error occurred during registration. Please try again.";
+  } catch (error: any) {
+    console.error("Registration error:", error);
+    formError.value = error?.data?.message || "An error occurred during registration. Please try again.";
+
+    toaster("Registration failed", "destructive");
   } finally {
     isSubmitting.value = false;
   }

@@ -21,7 +21,7 @@ export type PlanType = (typeof PlanType)[keyof typeof PlanType];
 export const users = sqliteTable(
   "users",
   {
-    id: text("id").primaryKey(),
+    id: integer("id").primaryKey({ autoIncrement: true }),
     email: text("email").notNull().unique(),
     password: text("password"),
     authType: text("auth_type", { enum: ["google", "local"] }).notNull(),
@@ -44,8 +44,8 @@ export const users = sqliteTable(
 export const stripeCustomers = sqliteTable(
   "stripe_customers",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
       .notNull()
       .references(() => users.id),
     stripeCustomerId: text("stripe_customer_id").notNull().unique(),
@@ -68,8 +68,8 @@ export const stripeCustomers = sqliteTable(
 export const passwordResetTokens = sqliteTable(
   "password_reset_tokens",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
       .notNull()
       .references(() => users.id),
     token: text("token").notNull().unique(),

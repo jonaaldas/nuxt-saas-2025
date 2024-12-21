@@ -12,7 +12,6 @@ interface CreateUserInput {
 export const insertUser = async ({ email, password, name, authType = "local" }: CreateUserInput) => {
   try {
     const newUser: NewUser = {
-      id: nanoid(),
       email: email.toLowerCase(),
       password,
       name,
