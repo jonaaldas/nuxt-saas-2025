@@ -1,7 +1,6 @@
 <style scoped></style>
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { useIsAuthenticated, useIsPaid } from "~/composables/states";
 
 import {
   Breadcrumb,
@@ -63,12 +62,13 @@ const navigationItems = computed(() => {
   }
 
   // Only show pricing if user is authenticated but not paid
-  if (loggedIn.value && user.value?.isPaid === false) {
+  if (loggedIn.value && !user.value?.isPaid) {
     baseItems.push({
       title: "Pricing",
       tab: "pricing",
     });
   }
+  console.log("baseItems", baseItems);
   return baseItems;
 });
 

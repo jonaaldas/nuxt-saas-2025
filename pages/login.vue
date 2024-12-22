@@ -116,9 +116,7 @@ const handleLogin = async () => {
 
     if (response.success) {
       toaster("Login successful!", "default");
-
-      // Redirect to dashboard
-      await navigateTo("/dashboard");
+      window.location.href = "/dashboard";
     }
   } catch (error: any) {
     console.error("Login error:", error);
