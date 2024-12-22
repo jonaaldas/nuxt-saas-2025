@@ -1,17 +1,13 @@
 <script lang="ts" setup>
 import { ref, computed } from "vue";
-import { useIsAuthenticated, useIsPaid, useUser } from "~/composables/states";
-import { useRouter } from "vue-router";
 
 const colorMode = useColorMode();
 
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -24,19 +20,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { ChevronsDown, Menu, User, CreditCard, LogOut } from "lucide-vue-next";
 import ToggleTheme from "./ToggleTheme.vue";
 
-// Get auth states
-// const loggedIn = useIsAuthenticated();
-const isPaid = useIsPaid();
-// const user = useUser();
-
 const { loggedIn, user, session, fetch, clear } = useUserSession();
-console.log("🚀 ~ user:", user);
+
 interface RouteProps {
   href: string;
   label: string;
@@ -63,23 +53,19 @@ const routeList: RouteProps[] = [
 
 const isOpen = ref<boolean>(false);
 
-// Get user initials for avatar fallback
 const userInitials = computed(() => {
   if (!user.value) return "";
   return `${user.value.name}`.toUpperCase();
 });
 
-// Handle logout
 const handleLogout = () => {
   clear();
 };
 
-// Handle billing portal redirect
 const handleBillingPortal = () => {
   window.open("https://billing.stripe.com/p/login/test_eVa00b6zKa4k7pm4gg", "_blank");
 };
 
-// Handle profile navigation
 const handleProfileClick = () => {
   navigateTo(
     {
@@ -90,7 +76,6 @@ const handleProfileClick = () => {
   isOpen.value = false;
 };
 
-// Handle auth navigation
 const handleLogin = () => {
   navigateTo("/login", { replace: true });
   isOpen.value = false;

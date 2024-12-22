@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
   return {
-    message: "Hello, world!",
+    message: "Protected route working!",
   };
 });

@@ -132,15 +132,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "#components";
-import { Button } from "#components";
-import { Input } from "#components";
-import { Label } from "#components";
+import { ref, computed, onMounted } from "vue";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Camera, UserCircle } from "lucide-vue-next";
+import { useToast } from "@/components/ui/toast/use-toast";
 
 // Generate unique ID for file input
 const uploadInputId = `file-upload-${Math.random().toString(36).substr(2, 9)}`;
+
+const { toast } = useToast();
+const { user, fetch: refreshSession } = useUserSession();
 
 // Avatar state
 const avatarUrl = ref(""); // Would be populated from user data
@@ -150,7 +154,7 @@ const isUpdating = ref(false);
 // Personal info state
 const firstName = ref("");
 const lastName = ref("");
-const email = ref("user@example.com"); // Would be populated from user data
+const email = ref(user.value?.email || "");
 const firstNameError = ref("");
 const lastNameError = ref("");
 const isUpdatingInfo = ref(false);
@@ -185,7 +189,11 @@ const handleAvatarChange = (event: Event) => {
 
 const handleAvatarUpload = async () => {
   if (!avatarPreview.value) {
-    toaster("Please select an image", "destructive");
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Please select an image",
+    });
     return;
   }
 
@@ -194,9 +202,17 @@ const handleAvatarUpload = async () => {
     await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
     avatarUrl.value = avatarPreview.value;
     avatarPreview.value = "";
-    toaster("Avatar updated successfully");
+    toast({
+      title: "Success",
+      description: "Avatar updated successfully",
+    });
   } catch (error) {
     console.error("Error updating avatar:", error);
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to update avatar",
+    });
   } finally {
     isUpdating.value = false;
   }
@@ -208,9 +224,17 @@ const handleAvatarRemove = async () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     avatarUrl.value = "";
     avatarPreview.value = "";
-    toaster("Avatar removed successfully");
+    toast({
+      title: "Success",
+      description: "Avatar removed successfully",
+    });
   } catch (error) {
     console.error("Error removing avatar:", error);
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to remove avatar",
+    });
   } finally {
     isUpdating.value = false;
   }
@@ -321,14 +345,29 @@ const handlePersonalInfoUpdate = async () => {
 
   try {
     isUpdatingInfo.value = true;
-    await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
 
-    console.log("Personal info updated:", {
-      firstName: firstName.value,
-      lastName: lastName.value,
+    const fullName = `${firstName.value} ${lastName.value}`.trim();
+    const response = await $fetch("/api/protected/profile", {
+      method: "PUT",
+      body: {
+        name: fullName,
+      },
     });
-  } catch (error) {
-    console.error("Error updating personal info:", error);
+
+    if (response.success) {
+      await refreshSession();
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    }
+  } catch (error: any) {
+    console.error("Error updating profile:", error);
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: error?.data?.message || "Failed to update profile",
+    });
   } finally {
     isUpdatingInfo.value = false;
   }
@@ -343,24 +382,33 @@ const handlePasswordChange = async () => {
 
   try {
     isChangingPassword.value = true;
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
-
-    // Simulate password verification
-    if (currentPassword.value === "wrongpassword") {
-      currentPasswordError.value = "Current password is incorrect";
-      return;
-    }
-
-    console.log("Password changed successfully");
-
-    // Reset form
-    currentPassword.value = "";
-    newPassword.value = "";
-    confirmNewPassword.value = "";
-  } catch (error) {
-    console.error("Error changing password:", error);
+    // Password change API call will be implemented later
+    toast({
+      variant: "destructive",
+      title: "Not Implemented",
+      description: "Password change functionality will be added soon",
+    });
+  } catch (error: any) {
+    console.error("Password change error:", error);
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: error?.data?.message || "Failed to change password",
+    });
   } finally {
     isChangingPassword.value = false;
   }
 };
+
+// Initialize form with user data
+onMounted(() => {
+  if (user.value?.name) {
+    const [first, ...rest] = user.value.name.split(" ");
+    firstName.value = first;
+    lastName.value = rest.join(" ");
+  }
+  if (user.value?.avatarUrl) {
+    avatarUrl.value = user.value.avatarUrl;
+  }
+});
 </script>

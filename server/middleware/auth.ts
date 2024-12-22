@@ -4,7 +4,6 @@ export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname;
   if (path.startsWith("/api/protected/")) {
     try {
-      // Verify user session
       await requireUserLoggedIn(event);
     } catch (error) {
       throw createError({
