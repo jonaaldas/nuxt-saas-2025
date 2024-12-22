@@ -121,14 +121,10 @@ const handleResetRequest = async () => {
       emailSent.value = true;
       toaster("Check your email", "default");
     } else {
-      // Even if the response indicates failure, we show the same message
-      // This prevents email enumeration
       emailSent.value = true;
       toaster("Check your email", "default");
     }
   } catch (error: any) {
-    console.error("Password reset request error:", error);
-    // For security, we don't show specific error messages
     toaster("Request failed", "destructive");
   } finally {
     isSubmitting.value = false;
