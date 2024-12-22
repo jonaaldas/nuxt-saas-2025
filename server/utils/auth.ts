@@ -1,5 +1,5 @@
 import type { H3Event } from "h3";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "../db/index";
 import bcrypt from "bcrypt";
 import { users, stripeCustomers } from "../db/schema";
@@ -21,11 +21,11 @@ interface UserLogin {
 async function login(event: H3Event<Request>, user: UserLogin) {
   await replaceUserSession(event, {
     user: {
-      id: user.id,
+      id: user.id.toString(),
       name: user.name,
       email: user.email,
       avatarUrl: user.avatarUrl,
-      authType: user.authType,
+      authType: user.authType as "google" | "local",
       isPaid: user.isPaid,
     },
     loggedInAt: new Date(),
@@ -70,7 +70,6 @@ async function attempt(event: H3Event<Request>, email: string, password: string)
       .where(eq(users.email, email))
       .limit(1)
   )?.[0];
-  console.log(foundUser);
 
   if (!foundUser || !foundUser.password || !bcrypt.compareSync(password, foundUser.password)) {
     throw createError({
@@ -79,7 +78,14 @@ async function attempt(event: H3Event<Request>, email: string, password: string)
     });
   }
 
-  await login(event, foundUser);
+  await login(event, {
+    id: foundUser.id,
+    name: foundUser.name,
+    email: foundUser.email,
+    avatarUrl: "",
+    authType: "local",
+    isPaid: foundUser.isPaid,
+  });
   return true;
 }
 

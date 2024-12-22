@@ -71,8 +71,7 @@ const userInitials = computed(() => {
 
 // Handle logout
 const handleLogout = () => {
-  // Add logout logic here
-  console.log("Logging out...");
+  clear();
 };
 
 // Handle billing portal redirect
