@@ -93,9 +93,11 @@
                 id="currentPassword"
                 v-model="currentPassword"
                 type="password"
-                :class="{ 'border-red-500': currentPasswordError }"
+                :class="{ 'border-red-500': passwordErrors.currentPassword }"
                 placeholder="Enter your current password" />
-              <p v-if="currentPasswordError" class="text-sm text-red-500">{{ currentPasswordError }}</p>
+              <p v-if="passwordErrors.currentPassword" class="text-sm text-red-500">
+                {{ passwordErrors.currentPassword }}
+              </p>
             </div>
             <div class="space-y-2">
               <Label for="newPassword">New Password</Label>
@@ -103,10 +105,10 @@
                 id="newPassword"
                 v-model="newPassword"
                 type="password"
-                :class="{ 'border-red-500': newPasswordError }"
+                :class="{ 'border-red-500': passwordErrors.newPassword }"
                 placeholder="Enter your new password"
-                @blur="validateNewPassword" />
-              <p v-if="newPasswordError" class="text-sm text-red-500">{{ newPasswordError }}</p>
+                @blur="validatePasswords" />
+              <p v-if="passwordErrors.newPassword" class="text-sm text-red-500">{{ passwordErrors.newPassword }}</p>
             </div>
             <div class="space-y-2">
               <Label for="confirmNewPassword">Confirm New Password</Label>
@@ -114,10 +116,12 @@
                 id="confirmNewPassword"
                 v-model="confirmNewPassword"
                 type="password"
-                :class="{ 'border-red-500': confirmNewPasswordError }"
+                :class="{ 'border-red-500': passwordErrors.confirmNewPassword }"
                 placeholder="Confirm your new password"
-                @blur="validateConfirmNewPassword" />
-              <p v-if="confirmNewPasswordError" class="text-sm text-red-500">{{ confirmNewPasswordError }}</p>
+                @blur="validatePasswords" />
+              <p v-if="passwordErrors.confirmNewPassword" class="text-sm text-red-500">
+                {{ passwordErrors.confirmNewPassword }}
+              </p>
             </div>
           </div>
           <div class="flex justify-center sm:justify-start">
@@ -139,6 +143,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Camera, UserCircle } from "lucide-vue-next";
 import { useToast } from "@/components/ui/toast/use-toast";
+import { z } from "zod";
 
 // Generate unique ID for file input
 const uploadInputId = `file-upload-${Math.random().toString(36).substr(2, 9)}`;
@@ -159,13 +164,33 @@ const firstNameError = ref("");
 const lastNameError = ref("");
 const isUpdatingInfo = ref(false);
 
+// Zod Schemas
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number")
+      .regex(/[!@#$%^&*]/, "Password must contain at least one special character (!@#$%^&*)"),
+    confirmNewPassword: z.string().min(1, "Please confirm your new password"),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Passwords do not match",
+    path: ["confirmNewPassword"],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "New password must be different from current password",
+    path: ["newPassword"],
+  });
+
 // Password change state
 const currentPassword = ref("");
 const newPassword = ref("");
 const confirmNewPassword = ref("");
-const currentPasswordError = ref("");
-const newPasswordError = ref("");
-const confirmNewPasswordError = ref("");
+const passwordErrors = ref<Record<string, string>>({});
 const isChangingPassword = ref(false);
 
 // Avatar handlers
@@ -274,55 +299,24 @@ const isPersonalInfoValid = computed(() => {
 });
 
 // Password validation
-const validateNewPassword = () => {
-  const password = newPassword.value;
-
-  if (!password) {
-    newPasswordError.value = "New password is required";
-    return;
-  }
-
-  if (password === currentPassword.value) {
-    newPasswordError.value = "New password must be different from current password";
-    return;
-  }
-
-  if (password.length < 8) {
-    newPasswordError.value = "Password must be at least 8 characters long";
-    return;
-  }
-
-  if (!/[A-Z]/.test(password)) {
-    newPasswordError.value = "Password must contain at least one uppercase letter";
-    return;
-  }
-
-  if (!/[a-z]/.test(password)) {
-    newPasswordError.value = "Password must contain at least one lowercase letter";
-    return;
-  }
-
-  if (!/[0-9]/.test(password)) {
-    newPasswordError.value = "Password must contain at least one number";
-    return;
-  }
-
-  if (!/[!@#$%^&*]/.test(password)) {
-    newPasswordError.value = "Password must contain at least one special character (!@#$%^&*)";
-    return;
-  }
-
-  newPasswordError.value = "";
-  validateConfirmNewPassword();
-};
-
-const validateConfirmNewPassword = () => {
-  if (!confirmNewPassword.value) {
-    confirmNewPasswordError.value = "Please confirm your new password";
-  } else if (confirmNewPassword.value !== newPassword.value) {
-    confirmNewPasswordError.value = "Passwords do not match";
-  } else {
-    confirmNewPasswordError.value = "";
+const validatePasswords = () => {
+  try {
+    passwordSchema.parse({
+      currentPassword: currentPassword.value,
+      newPassword: newPassword.value,
+      confirmNewPassword: confirmNewPassword.value,
+    });
+    passwordErrors.value = {};
+    return true;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      passwordErrors.value = error.errors.reduce((acc, curr) => {
+        const field = curr.path[0].toString();
+        acc[field] = curr.message;
+        return acc;
+      }, {} as Record<string, string>);
+    }
+    return false;
   }
 };
 
@@ -331,8 +325,7 @@ const isPasswordFormValid = computed(() => {
     currentPassword.value &&
     newPassword.value &&
     confirmNewPassword.value &&
-    !newPasswordError.value &&
-    !confirmNewPasswordError.value
+    Object.keys(passwordErrors.value).length === 0
   );
 });
 
@@ -340,6 +333,14 @@ const isPasswordFormValid = computed(() => {
 const handlePersonalInfoUpdate = async () => {
   validateFirstName();
   validateLastName();
+
+  const splitName = user.value?.name?.split(" ");
+  const firstNameMatch = splitName?.[0] === firstName.value;
+  const lastNameMatch = splitName?.[1] === lastName.value;
+  if (firstNameMatch && lastNameMatch) {
+    toaster("No changes detected", "destructive");
+    return;
+  }
 
   if (!isPersonalInfoValid.value) return;
 
@@ -355,11 +356,14 @@ const handlePersonalInfoUpdate = async () => {
     });
 
     if (response.success) {
-      await refreshSession();
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
+      // Refresh session with new data
+      const refreshResponse = await $fetch("/api/protected/refresh");
+      if (refreshResponse.success) {
+        toast({
+          title: "Success",
+          description: "Profile updated successfully",
+        });
+      }
     }
   } catch (error: any) {
     console.error("Error updating profile:", error);
@@ -374,20 +378,30 @@ const handlePersonalInfoUpdate = async () => {
 };
 
 const handlePasswordChange = async () => {
-  currentPasswordError.value = "";
-  validateNewPassword();
-  validateConfirmNewPassword();
-
-  if (!isPasswordFormValid.value) return;
+  if (!validatePasswords()) return;
 
   try {
     isChangingPassword.value = true;
-    // Password change API call will be implemented later
-    toast({
-      variant: "destructive",
-      title: "Not Implemented",
-      description: "Password change functionality will be added soon",
+
+    const response = await $fetch("/api/protected/change-password", {
+      method: "POST",
+      body: {
+        currentPassword: currentPassword.value,
+        newPassword: newPassword.value,
+      },
     });
+
+    if (response.success) {
+      toast({
+        title: "Success",
+        description: "Password changed successfully",
+      });
+      // Clear form
+      currentPassword.value = "";
+      newPassword.value = "";
+      confirmNewPassword.value = "";
+      passwordErrors.value = {};
+    }
   } catch (error: any) {
     console.error("Password change error:", error);
     toast({
