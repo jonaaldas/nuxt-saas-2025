@@ -124,7 +124,7 @@ const handleLogin = async () => {
     console.error("Login error:", error);
     formError.value = error?.data?.message || "Invalid email or password";
 
-    toaster("Login failed", "destructive");
+    toaster(formError.value, "destructive");
   } finally {
     isSubmitting.value = false;
   }
