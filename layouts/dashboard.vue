@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref, markRaw, shallowRef, computed, watch } from "vue";
+import { markRaw, computed } from "vue";
 import { useIsAuthenticated, useIsPaid } from "~/composables/states";
 import Profile from "~/components/dashboard/Profile.vue";
 import Pricing from "~/components/Pricing.vue";
 import Billing from "~/components/dashboard/Billing.vue";
 
-const route = useRoute();
 const isAuthenticated = useIsAuthenticated();
 const isPaid = useIsPaid();
 
@@ -21,7 +20,6 @@ const getTabComponent = (tab: string) => {
   return tabComponents[tab as TabName] || null;
 };
 
-// Get default tab based on auth state
 const getDefaultTab = computed(() => {
   if (isAuthenticated.value && isPaid.value) {
     return "profile";
@@ -43,9 +41,7 @@ onMounted(() => {
     <SidebarComponent>
       <template #content="{ tab }">
         <main class="p-6">
-          <!-- Show tab component if it exists -->
           <component :is="getTabComponent(tab)" v-if="getTabComponent(tab)" />
-          <!-- Fallback to NuxtPage for other routes -->
           <NuxtPage v-else />
         </main>
       </template>

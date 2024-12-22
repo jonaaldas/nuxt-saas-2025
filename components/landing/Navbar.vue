@@ -31,10 +31,12 @@ import { ChevronsDown, Menu, User, CreditCard, LogOut } from "lucide-vue-next";
 import ToggleTheme from "./ToggleTheme.vue";
 
 // Get auth states
-const isAuthenticated = useIsAuthenticated();
+// const loggedIn = useIsAuthenticated();
 const isPaid = useIsPaid();
-const user = useUser();
+// const user = useUser();
 
+const { loggedIn, user, session, fetch, clear } = useUserSession();
+console.log("🚀 ~ user:", user);
 interface RouteProps {
   href: string;
   label: string;
@@ -64,7 +66,7 @@ const isOpen = ref<boolean>(false);
 // Get user initials for avatar fallback
 const userInitials = computed(() => {
   if (!user.value) return "";
-  return `${user.value.firstName[0]}${user.value.lastName[0]}`.toUpperCase();
+  return `${user.value.name}`.toUpperCase();
 });
 
 // Handle logout
@@ -148,14 +150,14 @@ const handleSignup = () => {
             </div>
 
             <!-- User Section for Mobile -->
-            <div v-if="isAuthenticated" class="mt-4 border-t pt-4">
+            <div v-if="loggedIn" class="mt-4 border-t pt-4">
               <p class="px-2 text-sm font-medium text-muted-foreground mb-2">My Account</p>
               <div class="flex flex-col gap-2">
                 <Button variant="ghost" class="justify-start" @click="handleProfileClick">
                   <User class="mr-2 h-4 w-4" />
                   Profile
                 </Button>
-                <Button v-if="isPaid" variant="ghost" class="justify-start" @click="handleBillingPortal">
+                <Button v-if="user?.isPaid" variant="ghost" class="justify-start" @click="handleBillingPortal">
                   <CreditCard class="mr-2 h-4 w-4" />
                   Billing
                 </Button>
@@ -207,7 +209,7 @@ const handleSignup = () => {
       <ToggleTheme />
 
       <!-- User Dropdown -->
-      <DropdownMenu v-if="isAuthenticated">
+      <DropdownMenu v-if="loggedIn">
         <DropdownMenuTrigger>
           <Avatar>
             <AvatarImage :src="`https://avatar.vercel.sh/${user?.email}.png`" alt="User avatar" />
@@ -220,7 +222,7 @@ const handleSignup = () => {
             <User class="mr-2 h-4 w-4" />
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem v-if="isPaid" @click="handleBillingPortal">
+          <DropdownMenuItem v-if="user?.isPaid" @click="handleBillingPortal">
             <CreditCard class="mr-2 h-4 w-4" />
             Billing
           </DropdownMenuItem>

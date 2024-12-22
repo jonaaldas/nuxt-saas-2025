@@ -27,12 +27,11 @@ import {
 
 const router = useRouter();
 let tab = ref("");
-const isAuthenticated = useIsAuthenticated();
-const isPaid = useIsPaid();
+const { loggedIn, user, session, fetch, clear } = useUserSession();
 
 // Get default tab based on auth state
 const defaultTab = computed(() => {
-  if (isAuthenticated.value && isPaid.value) {
+  if (loggedIn.value && user.value?.isPaid === true) {
     return "profile";
   }
   return "pricing";
@@ -56,7 +55,7 @@ const navigationItems = computed(() => {
   ];
 
   // Only show billing if user is authenticated and paid
-  if (isAuthenticated.value && isPaid.value) {
+  if (loggedIn.value && user.value?.isPaid === true) {
     baseItems.push({
       title: "Billing",
       tab: "billing",
@@ -64,7 +63,7 @@ const navigationItems = computed(() => {
   }
 
   // Only show pricing if user is authenticated but not paid
-  if (isAuthenticated.value && !isPaid.value) {
+  if (loggedIn.value && user.value?.isPaid === false) {
     baseItems.push({
       title: "Pricing",
       tab: "pricing",
@@ -77,6 +76,11 @@ const data = ref({
   title: "Dashboard",
   navNow: navigationItems,
 });
+
+const logOut = () => {
+  clear();
+  router.push("/");
+};
 
 onMounted(() => {
   const url = new URL(window.location.href);
@@ -119,7 +123,7 @@ onMounted(() => {
       </SidebarGroup>
       <SidebarRail />
       <SidebarFooter>
-        <Button> Log out </Button>
+        <Button @click="logOut"> Log out </Button>
       </SidebarFooter>
     </Sidebar>
     <SidebarInset>

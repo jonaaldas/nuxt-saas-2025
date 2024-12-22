@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    console.log(user);
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password || "");
     if (!isValidPassword) {
@@ -32,6 +33,7 @@ export default defineEventHandler(async (event) => {
         message: "Invalid email or password",
       });
     }
+    console.log("isValidPassword", isValidPassword);
 
     let avatarUrl = user.avatarUrl || "";
     // Create session
@@ -41,6 +43,7 @@ export default defineEventHandler(async (event) => {
       name: user.name,
       avatarUrl,
       authType: user.authType,
+      isPaid: user.isPaid,
     });
 
     return {

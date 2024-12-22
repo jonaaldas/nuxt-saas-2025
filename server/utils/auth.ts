@@ -2,7 +2,7 @@ import type { H3Event } from "h3";
 import { eq } from "drizzle-orm";
 import { db } from "../db/index";
 import bcrypt from "bcrypt";
-import { users } from "../db/schema";
+import { users, stripeCustomers } from "../db/schema";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import type { User } from "../../types/user.types";
@@ -14,6 +14,7 @@ interface UserLogin {
   email: string;
   avatarUrl: string;
   authType: string;
+  isPaid: boolean;
   password?: string;
 }
 
@@ -25,6 +26,7 @@ async function login(event: H3Event<Request>, user: UserLogin) {
       email: user.email,
       avatarUrl: user.avatarUrl,
       authType: user.authType,
+      isPaid: user.isPaid,
     },
     loggedInAt: new Date(),
   });
@@ -54,11 +56,21 @@ async function attempt(event: H3Event<Request>, email: string, password: string)
         password: users.password,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
+        isPaid: sql<boolean>`
+      CASE 
+        WHEN ${stripeCustomers.userId} IS NOT NULL 
+        AND ${stripeCustomers.planType} = 'paid' 
+        THEN true 
+        ELSE false 
+      END
+    `,
       })
       .from(users)
+      .leftJoin(stripeCustomers, eq(users.id, stripeCustomers.userId))
       .where(eq(users.email, email))
       .limit(1)
   )?.[0];
+  console.log(foundUser);
 
   if (!foundUser || !foundUser.password || !bcrypt.compareSync(password, foundUser.password)) {
     throw createError({

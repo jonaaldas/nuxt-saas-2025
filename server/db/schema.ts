@@ -49,7 +49,8 @@ export const stripeCustomers = sqliteTable(
       .notNull()
       .references(() => users.id),
     stripeCustomerId: text("stripe_customer_id").notNull().unique(),
-    planType: text("plan_type", { enum: ["basic", "pro", "enterprise"] }).notNull(),
+    planType: text("plan_type", { enum: ["free", "paid"] }).notNull(),
+    planName: text("plan_name"),
     credits: integer("credits"),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
