@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "nuxt-auth-utils",
     "nuxt-resend",
+    "@uploadthing/nuxt",
   ],
   colorMode: {
     classSuffix: "",
@@ -17,6 +18,10 @@ export default defineNuxtConfig({
     storageKey: "color-mode",
   },
   ssr: false,
+  uploadthing: {
+    routerPath: "~/server/uploadthing.ts",
+    logLevel: "None",
+  },
   routeRules: {
     "/blog/**": { ssr: true },
   },

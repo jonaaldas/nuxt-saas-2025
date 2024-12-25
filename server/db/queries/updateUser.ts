@@ -2,7 +2,12 @@ import { eq } from "drizzle-orm";
 import { db } from "..";
 import { users } from "../schema";
 
-export const updateUser = async (userId: number, data: { name?: string }) => {
+interface UpdateUserData {
+  name?: string;
+  avatarUrl?: string | null;
+}
+
+export const updateUser = async (userId: number, data: UpdateUserData) => {
   try {
     const updatedUser = await db
       .update(users)

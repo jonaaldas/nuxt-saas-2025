@@ -24,7 +24,18 @@
                 class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-sm hover:bg-primary/90"
                 :for="uploadInputId">
                 <Camera color="white" :size="20" />
-                <input :id="uploadInputId" type="file" accept="image/*" class="hidden" @change="handleAvatarChange" />
+                <input
+                  :id="uploadInputId"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="
+                    async (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (!file) return;
+                      await compressImage(file);
+                    }
+                  " />
               </label>
             </div>
           </div>
@@ -32,9 +43,7 @@
             <h3 class="text-lg font-medium">Profile Picture</h3>
             <p class="text-sm text-muted-foreground">Upload a new avatar or remove the current one</p>
             <div class="flex justify-center sm:justify-start space-x-2 mt-2">
-              <Button variant="outline" size="sm" :disabled="isUpdating" @click="handleAvatarUpload">
-                {{ isUpdating ? "Updating..." : "Update" }}
-              </Button>
+              <span v-if="isUpdating" class="text-sm text-muted-foreground">Updating...</span>
               <Button variant="outline" size="sm" :disabled="isUpdating || !avatarUrl" @click="handleAvatarRemove">
                 Remove
               </Button>
@@ -144,6 +153,7 @@ import { Label } from "@/components/ui/label";
 import { Camera, UserCircle } from "lucide-vue-next";
 import { useToast } from "@/components/ui/toast/use-toast";
 import { z } from "zod";
+import imageCompression from "browser-image-compression";
 
 // Generate unique ID for file input
 const uploadInputId = `file-upload-${Math.random().toString(36).substr(2, 9)}`;
@@ -163,6 +173,46 @@ const email = ref(user.value?.email || "");
 const firstNameError = ref("");
 const lastNameError = ref("");
 const isUpdatingInfo = ref(false);
+
+const compressImage = async (file: File) => {
+  const options = {
+    maxSizeMB: 0.1,
+    maxWidthOrHeight: 1024,
+    useWebWorker: true,
+  };
+
+  try {
+    const compressedFile = await imageCompression(file, options);
+    console.log("Compressed file size:", compressedFile.size / 1024, "KB");
+    await startUpload([compressedFile]);
+    return compressedFile;
+  } catch (error) {
+    console.error("Image compression failed:", error);
+  }
+};
+
+const { startUpload, isUploading } = useUploadThing("imageUploader", {
+  async onClientUploadComplete(res) {
+    isUpdating.value = true;
+    console.log("Client upload complete", res);
+    avatarUrl.value = res[0].url;
+    await $fetch("/api/protected/profile", {
+      method: "PUT",
+      body: {
+        avatarUrl: res[0].url,
+      },
+    });
+    console.log("Avatar URL saved to database");
+    const refreshResponse = await $fetch("/api/protected/refresh");
+    if (refreshResponse.success) {
+      toast({
+        title: "Success",
+        description: "Avatar updated successfully",
+      });
+    }
+    isUpdating.value = false;
+  },
+});
 
 // Zod Schemas
 const passwordSchema = z
@@ -212,53 +262,36 @@ const handleAvatarChange = (event: Event) => {
   }
 };
 
-const handleAvatarUpload = async () => {
-  if (!avatarPreview.value) {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Please select an image",
-    });
-    return;
-  }
-
-  try {
-    isUpdating.value = true;
-    await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
-    avatarUrl.value = avatarPreview.value;
-    avatarPreview.value = "";
-    toast({
-      title: "Success",
-      description: "Avatar updated successfully",
-    });
-  } catch (error) {
-    console.error("Error updating avatar:", error);
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Failed to update avatar",
-    });
-  } finally {
-    isUpdating.value = false;
-  }
-};
-
 const handleAvatarRemove = async () => {
   try {
     isUpdating.value = true;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    avatarUrl.value = "";
-    avatarPreview.value = "";
-    toast({
-      title: "Success",
-      description: "Avatar removed successfully",
+
+    // Call the API to remove the avatar
+    const response = await $fetch("/api/protected/profile", {
+      method: "PUT",
+      body: {
+        avatarUrl: null,
+      },
     });
-  } catch (error) {
+
+    if (response.success) {
+      // Refresh session with new data
+      const refreshResponse = await $fetch("/api/protected/refresh");
+      if (refreshResponse.success) {
+        avatarUrl.value = "";
+        avatarPreview.value = "";
+        toast({
+          title: "Success",
+          description: "Avatar removed successfully",
+        });
+      }
+    }
+  } catch (error: any) {
     console.error("Error removing avatar:", error);
     toast({
       variant: "destructive",
       title: "Error",
-      description: "Failed to remove avatar",
+      description: error?.data?.message || "Failed to remove avatar",
     });
   } finally {
     isUpdating.value = false;
@@ -333,14 +366,6 @@ const isPasswordFormValid = computed(() => {
 const handlePersonalInfoUpdate = async () => {
   validateFirstName();
   validateLastName();
-
-  const splitName = user.value?.name?.split(" ");
-  const firstNameMatch = splitName?.[0] === firstName.value;
-  const lastNameMatch = splitName?.[1] === lastName.value;
-  if (firstNameMatch && lastNameMatch) {
-    toaster("No changes detected", "destructive");
-    return;
-  }
 
   if (!isPersonalInfoValid.value) return;
 
