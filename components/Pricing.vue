@@ -56,8 +56,8 @@ const handlePlanSelection = (plan: Pricing) => {
       </h2>
       <p class="mt-1 text-muted-foreground">Whatever your status, our offers evolve according to your needs.</p>
     </div>
-    <div class="flex flex-col items-center justify-center sm:flex-row mt-10">
-      <Card class="">
+    <div class="flex flex-col items-center justify-center sm:grid sm:grid-cols-3 sm:grid-rows-1 gap-4 mt-10">
+      <Card class="w-full sm:h-[90%]">
         <CardHeader class="text-center pb-2">
           <CardTitle class="mb-7">Free</CardTitle>
           <span class="font-bold text-5xl">Free</span>
@@ -72,13 +72,21 @@ const handlePlanSelection = (plan: Pricing) => {
               <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
               <span class="text-muted-foreground">Upload videos</span>
             </li>
+            <li class="flex space-x-2">
+              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
+              <span class="text-muted-foreground">Upload videos</span>
+            </li>
+            <li class="flex space-x-2">
+              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
+              <span class="text-muted-foreground">Upload videos</span>
+            </li>
           </ul>
         </CardContent>
         <CardFooter>
           <Button @click="handlePlanSelection(pricing[0])" class="w-full" variant="outline">Sign up</Button>
         </CardFooter>
       </Card>
-      <Card class="border-primary relative">
+      <Card class="border-primary relative w-full">
         <span class="absolute -top-12 left-1/2 -translate-x-1/2 animate-bounce hidden sm:block w-full">
           <span class="flex items-center">
             <svg
@@ -133,7 +141,7 @@ const handlePlanSelection = (plan: Pricing) => {
           >
         </CardFooter>
       </Card>
-      <Card class="">
+      <Card class="w-full sm:h-[90%]">
         <CardHeader class="text-center pb-2">
           <CardTitle class="mb-7">Content Creator</CardTitle>
           <div>

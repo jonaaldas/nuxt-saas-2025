@@ -90,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "#components";
 import { Button } from "#components";
 import { Input } from "#components";

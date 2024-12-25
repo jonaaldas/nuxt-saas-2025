@@ -194,7 +194,7 @@ const handleSignup = () => {
 
       <!-- User Dropdown -->
       <DropdownMenu v-if="loggedIn">
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger class="flex items-center">
           <Avatar>
             <AvatarImage :src="`https://avatar.vercel.sh/${user?.email}.png`" alt="User avatar" />
             <AvatarFallback>{{ userInitials }}</AvatarFallback>

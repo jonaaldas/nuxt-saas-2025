@@ -22,6 +22,16 @@ export default defineNuxtConfig({
     routerPath: "~/server/uploadthing.ts",
     logLevel: "None",
   },
+  runtimeConfig: {
+    stripe: {
+      key: process.env.NUXT_STRIPE_SECRET_KEY,
+    },
+    public: {
+      stripe: {
+        key: process.env.NUXT_STRIPE_PUBLIC_KEY,
+      },
+    },
+  },
   routeRules: {
     "/blog/**": { ssr: true },
   },
