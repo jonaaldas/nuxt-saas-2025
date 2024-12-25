@@ -39,11 +39,19 @@ const pricing: Pricing[] = [
 ];
 
 const handlePlanSelection = (plan: Pricing) => {
-  navigateTo(`/register?plan=${plan.priceId}&returnUrl=${plan.link}`, {
-    open: {
-      target: "_blank",
-    },
-  });
+  if (!loggedIn.value && !user.value.isPaid) {
+    navigateTo(`/register?plan=${plan.priceId}&returnUrl=${plan.link}`, {
+      open: {
+        target: "_blank",
+      },
+    });
+  } else {
+    navigateTo(plan.link, {
+      open: {
+        target: "_blank",
+      },
+    });
+  }
 };
 </script>
 
