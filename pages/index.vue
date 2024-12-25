@@ -7,8 +7,6 @@ import Pricing from "../components/Pricing.vue";
 import Contact from "../components/landing/Contact.vue";
 import FAQ from "../components/landing/FAQ.vue";
 import Footer from "../components/landing/Footer.vue";
-
-const colorMode = useColorMode();
 </script>
 
 <template>

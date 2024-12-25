@@ -11,16 +11,9 @@ export default defineNuxtConfig({
     "nuxt-resend",
     "@uploadthing/nuxt",
   ],
-  colorMode: {
-    classSuffix: "",
-    preference: "system",
-    fallback: "light",
-    storageKey: "color-mode",
-  },
   ssr: false,
   uploadthing: {
     routerPath: "~/server/uploadthing.ts",
-    logLevel: "None",
   },
   runtimeConfig: {
     stripe: {
