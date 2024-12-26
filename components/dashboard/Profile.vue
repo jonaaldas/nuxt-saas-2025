@@ -56,26 +56,15 @@
           <h3 class="text-lg font-medium">Personal Information</h3>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="space-y-2">
-              <Label for="firstName">First Name</Label>
+              <Label for="name">Name</Label>
               <Input
-                id="firstName"
-                v-model="firstName"
+                id="name"
+                v-model="name"
                 type="text"
-                :class="{ 'border-red-500': firstNameError }"
-                placeholder="Enter your first name"
-                @blur="validateFirstName" />
-              <p v-if="firstNameError" class="text-sm text-red-500">{{ firstNameError }}</p>
-            </div>
-            <div class="space-y-2">
-              <Label for="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                v-model="lastName"
-                type="text"
-                :class="{ 'border-red-500': lastNameError }"
-                placeholder="Enter your last name"
-                @blur="validateLastName" />
-              <p v-if="lastNameError" class="text-sm text-red-500">{{ lastNameError }}</p>
+                :class="{ 'border-red-500': nameError }"
+                placeholder="Enter your name"
+                @blur="validateName" />
+              <p v-if="nameError" class="text-sm text-red-500">{{ nameError }}</p>
             </div>
           </div>
           <div class="space-y-2">
@@ -86,7 +75,7 @@
             </p>
           </div>
           <div class="flex justify-center sm:justify-start">
-            <Button type="submit" :disabled="isUpdatingInfo || !isPersonalInfoValid">
+            <Button type="submit" :disabled="isUpdatingInfo || !isNameValid">
               {{ isUpdatingInfo ? "Saving Changes..." : "Save Changes" }}
             </Button>
           </div>
@@ -165,13 +154,10 @@ const { user, fetch: refreshSession } = useUserSession();
 const avatarUrl = ref(""); // Would be populated from user data
 const avatarPreview = ref("");
 const isUpdating = ref(false);
-
-// Personal info state
-const firstName = ref("");
-const lastName = ref("");
+const name = ref(user.value?.name || "");
 const email = ref(user.value?.email || "");
-const firstNameError = ref("");
-const lastNameError = ref("");
+const nameError = ref("");
+
 const isUpdatingInfo = ref(false);
 
 const compressImage = async (file: File) => {
@@ -236,14 +222,12 @@ const passwordSchema = z
     path: ["newPassword"],
   });
 
-// Password change state
 const currentPassword = ref("");
 const newPassword = ref("");
 const confirmNewPassword = ref("");
 const passwordErrors = ref<Record<string, string>>({});
 const isChangingPassword = ref(false);
 
-// Avatar handlers
 const handleAvatarChange = (event: Event) => {
   const input = event.target as HTMLInputElement;
   if (input.files && input.files[0]) {
@@ -298,40 +282,16 @@ const handleAvatarRemove = async () => {
   }
 };
 
-// Personal info validation
-const validateFirstName = () => {
-  const value = firstName.value.trim();
+const validateName = () => {
+  const value = name.value.trim();
+\
   if (!value) {
-    firstNameError.value = "First name is required";
-  } else if (value.length < 2) {
-    firstNameError.value = "First name must be at least 2 characters";
-  } else if (!/^[a-zA-Z\s-']+$/.test(value)) {
-    firstNameError.value = "First name can only contain letters, spaces, hyphens, and apostrophes";
+    nameError.value = "Name is required";
   } else {
-    firstNameError.value = "";
-    firstName.value = value;
+    nameError.value = "";
   }
 };
 
-const validateLastName = () => {
-  const value = lastName.value.trim();
-  if (!value) {
-    lastNameError.value = "Last name is required";
-  } else if (value.length < 2) {
-    lastNameError.value = "Last name must be at least 2 characters";
-  } else if (!/^[a-zA-Z\s-']+$/.test(value)) {
-    lastNameError.value = "Last name can only contain letters, spaces, hyphens, and apostrophes";
-  } else {
-    lastNameError.value = "";
-    lastName.value = value;
-  }
-};
-
-const isPersonalInfoValid = computed(() => {
-  return firstName.value && lastName.value && !firstNameError.value && !lastNameError.value;
-});
-
-// Password validation
 const validatePasswords = () => {
   try {
     passwordSchema.parse({
@@ -362,41 +322,36 @@ const isPasswordFormValid = computed(() => {
   );
 });
 
-// Form submission handlers
-const handlePersonalInfoUpdate = async () => {
-  validateFirstName();
-  validateLastName();
+const isNameValid = computed(() => {
+  return name.value && !nameError.value;
+});
+console.log(isNameValid.value);
 
-  if (!isPersonalInfoValid.value) return;
+const handlePersonalInfoUpdate = async () => {
+  validateName();
+
+  if (!isNameValid.value) return;
 
   try {
     isUpdatingInfo.value = true;
 
-    const fullName = `${firstName.value} ${lastName.value}`.trim();
+    const nameVal = name.value.trim();
     const response = await $fetch("/api/protected/profile", {
       method: "PUT",
       body: {
-        name: fullName,
+        name: nameVal,
       },
     });
 
     if (response.success) {
-      // Refresh session with new data
       const refreshResponse = await $fetch("/api/protected/refresh");
       if (refreshResponse.success) {
-        toast({
-          title: "Success",
-          description: "Profile updated successfully",
-        });
+        toaster("Success", "Profile updated successfully");
       }
     }
   } catch (error: any) {
     console.error("Error updating profile:", error);
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: error?.data?.message || "Failed to update profile",
-    });
+    toaster("Error", error?.data?.message || "Failed to update profile", "destructive");
   } finally {
     isUpdatingInfo.value = false;
   }
@@ -441,11 +396,6 @@ const handlePasswordChange = async () => {
 
 // Initialize form with user data
 onMounted(() => {
-  if (user.value?.name) {
-    const [first, ...rest] = user.value.name.split(" ");
-    firstName.value = first;
-    lastName.value = rest.join(" ");
-  }
   if (user.value?.avatarUrl) {
     avatarUrl.value = user.value.avatarUrl;
   }
