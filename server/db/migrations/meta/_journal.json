@@ -8,6 +8,13 @@
       "when": 1734815506017,
       "tag": "0000_goofy_prowler",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1736683895983,
+      "tag": "0001_high_karnak",
+      "breakpoints": true
     }
   ]
 }

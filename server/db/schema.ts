@@ -18,8 +18,8 @@ export const PlanType = {
 export type PlanType = (typeof PlanType)[keyof typeof PlanType];
 
 // Users table
-export const users = sqliteTable(
-  "users",
+export const accounts = sqliteTable(
+  "accounts",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     email: text("email").notNull().unique(),
@@ -45,9 +45,9 @@ export const stripeCustomers = sqliteTable(
   "stripe_customers",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
-    userId: integer("user_id")
+    accountId: integer("account_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => accounts.id),
     stripeCustomerId: text("stripe_customer_id").notNull().unique(),
     planType: text("plan_type", { enum: ["free", "paid"] }).notNull(),
     planName: text("plan_name"),
@@ -61,7 +61,7 @@ export const stripeCustomers = sqliteTable(
     deletedAt: integer("deleted_at", { mode: "timestamp" }),
   },
   (table) => ({
-    userIdIdx: index("idx_stripe_customers_user_id").on(table.userId),
+    accountIdIdx: index("idx_stripe_customers_account_id").on(table.accountId),
   })
 );
 
@@ -70,9 +70,9 @@ export const passwordResetTokens = sqliteTable(
   "password_reset_tokens",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
-    userId: integer("user_id")
+    accountId: integer("account_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => accounts.id),
     token: text("token").notNull().unique(),
     expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
     createdAt: integer("created_at", { mode: "timestamp" })
@@ -89,8 +89,8 @@ export const passwordResetTokens = sqliteTable(
 );
 
 // Types for type safety when querying
-export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;
+export type Account = typeof accounts.$inferSelect;
+export type NewAccount = typeof accounts.$inferInsert;
 
 export type StripeCustomer = typeof stripeCustomers.$inferSelect;
 export type NewStripeCustomer = typeof stripeCustomers.$inferInsert;
